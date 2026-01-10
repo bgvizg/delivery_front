@@ -5,6 +5,8 @@ let deliveryOverlays = [];
 let routeLine = null;
 let myLocationMarker = null;
 
+Kakao.init("d299ac3f39d133ec874c7b2aa687ec3a");
+
 /* ================= 지도 초기화 ================= */
 function initMap() {
   map = new kakao.maps.Map(document.getElementById("map"), {
@@ -161,16 +163,12 @@ function startGpsTracking() {
 
 /* ================== 네비 ================== */
 function startKakaoNavi(lat, lon, name) {
-  const encodedName = encodeURIComponent(name || "목적지");
-
-  const url =
-    `kakaonavi://navigate` +
-    `?name=${encodedName}` +
-    `&x=${lon}` +
-    `&y=${lat}` +
-    `&coord_type=wgs84`;
-
-  location.href = url;
+  Kakao.Navi.start({
+    name: name || "목적지",
+    x: lon, // 경도
+    y: lat, // 위도
+    coordType: "wgs84",
+  });
 }
 
 /* ================= 초기화 ================= */
