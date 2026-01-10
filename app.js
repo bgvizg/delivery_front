@@ -121,7 +121,7 @@ function showInfo(addr, memo, name, phoneNumber, lat, lon) {
 
     <button class="navi-btn"
       onclick="startKakaoNavi(${lat}, ${lon}, '${addr}')">
-      카카오내비로 경로 안내
+      카카오내비로 경로 안내 (모바일 전용)
     </button>
     <button onclick="document.getElementById('infoCard').remove()">닫기</button>
   `;
@@ -163,12 +163,15 @@ function startGpsTracking() {
 
 /* ================== 네비 ================== */
 function startKakaoNavi(lat, lon, name) {
-  Kakao.Navi.start({
-    name: "테스트 목적지",
-    x: 126.978,
-    y: 37.5665,
-    coordType: "wgs84",
-  });
+  // 1. 이름에 특수문자나 공백이 있을 수 있으므로 인코딩합니다.
+  const encodedName = encodeURIComponent(name);
+
+  // 2. 카카오맵 앱 호출 URL (출발지를 비워두면 자동으로 '현 위치' 혹은 '사용자 지정' 단계로 넘어갑니다)
+  // sp 파라미터를 생략하거나 비워두면 카카오맵 앱이 현재 위치를 기반으로 길찾기를 시작합니다.
+  const url = `kakaomap://route?ep=${lat},${lon}&en=${encodedName}&by=CAR`;
+
+  // 앱 실행 시도
+  location.href = url;
 }
 
 /* ================= 초기화 ================= */
