@@ -92,7 +92,7 @@ function drawOsrmRoute(geometry) {
     strokeWeight: 5,
     strokeColor: "#007AFF",
     strokeOpacity: 0.9,
-    strokeStyle: "arrow", // 🔥 가는 길 방향
+    strokeStyle: "solid",
     zIndex: 3,
   });
 
@@ -114,7 +114,7 @@ function startGpsTracking() {
         myLocationMarker = new kakao.maps.Marker({
           position: currentPos,
           map,
-          zIndex: 10, // 🔥 항상 최상단
+          zIndex: 10,
           image: new kakao.maps.MarkerImage(
             "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png",
             new kakao.maps.Size(24, 35)
