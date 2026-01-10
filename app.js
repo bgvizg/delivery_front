@@ -50,6 +50,16 @@ async function loadAreas() {
   if (areas.length > 0) loadRoute(areas[0]);
 }
 
+function showDeliveryInfo({ order, addr, memo }) {
+  const info = document.getElementById("infoBox");
+  info.innerHTML = `
+    <b>순서 ${order}</b><br/>
+    주소: ${addr}<br/>
+    메모: ${memo || "-"}
+  `;
+  info.style.display = "block";
+}
+
 /* ================= 경로 + 배달 데이터 ================= */
 async function loadRoute(area) {
   const res = await fetch(`${API_BASE}/route?area=${encodeURIComponent(area)}`);
@@ -62,15 +72,25 @@ async function loadRoute(area) {
 
   /* ---------- 배달 숫자 마커 ---------- */
   deliveries.forEach(([order, addr, lat, lon, memo]) => {
+    const content = document.createElement("div");
+    content.className = "order-marker";
+    content.textContent = order;
+
+    content.addEventListener("click", () => {
+      showDeliveryInfo({
+        order,
+        addr,
+        memo,
+        lat,
+        lon,
+      });
+    });
+
     const overlay = new kakao.maps.CustomOverlay({
       position: new kakao.maps.LatLng(lat, lon),
-      content: `
-        <div class="order-marker" onclick="alert('주소: ${addr}\n메모: ${memo}')">
-          ${order}
-        </div>
-      `,
+      content: content,
       yAnchor: 1,
-      zIndex: 2,
+      zIndex: 100 + order, // 순서 높은 게 위로
     });
 
     overlay.setMap(map);
