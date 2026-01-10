@@ -4,16 +4,32 @@ let map;
 let deliveryOverlays = [];
 let routeLine = null;
 let myLocationMarker = null;
+let isMapCentered = false;
 
 /* ================= 지도 초기화 ================= */
 function initMap() {
   map = new kakao.maps.Map(document.getElementById("map"), {
-    center: new kakao.maps.LatLng(37.5665, 126.978),
+    center: new kakao.maps.LatLng(37.5665, 126.978), // 임시
     level: 5,
   });
 
+  centerMapToMyLocation(); // 🔥 최초 1회만 중심 이동
   loadAreas();
   startGpsTracking();
+}
+
+/* ================= 최초 내 위치 중심 ================= */
+function centerMapToMyLocation() {
+  if (!navigator.geolocation) return;
+
+  navigator.geolocation.getCurrentPosition((pos) => {
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+    const myPos = new kakao.maps.LatLng(lat, lon);
+
+    map.setCenter(myPos);
+    isMapCentered = true;
+  });
 }
 
 /* ================= 지역 목록 ================= */
@@ -32,62 +48,58 @@ async function loadAreas() {
   });
 
   select.addEventListener("change", () => {
-    loadDeliveries(select.value);
+    loadRoute(select.value);
   });
 
-  if (areas.length > 0) loadDeliveries(areas[0]);
+  if (areas.length > 0) loadRoute(areas[0]);
 }
 
-/* ================= 배달 데이터 ================= */
-async function loadDeliveries(area) {
-  const res = await fetch(
-    `${API_BASE}/deliveries?area=${encodeURIComponent(area)}`
-  );
+/* ================= 경로 + 배달 데이터 ================= */
+async function loadRoute(area) {
+  const res = await fetch(`${API_BASE}/route?area=${encodeURIComponent(area)}`);
   const json = await res.json();
 
   clearDeliveries();
 
-  // 배달 순서 기준 정렬
-  const sorted = json.data.sort((a, b) => a[0] - b[0]);
+  const deliveries = json.deliveries;
+  const route = json.route;
 
-  const path = [];
-
-  sorted.forEach(([order, addr, lat, lon, memo]) => {
+  /* ---------- 배달 숫자 마커 ---------- */
+  deliveries.forEach(([order, addr, lat, lon, memo]) => {
     const pos = new kakao.maps.LatLng(lat, lon);
-    path.push(pos);
 
-    // 숫자 마커 (CustomOverlay)
     const overlay = new kakao.maps.CustomOverlay({
       position: pos,
-      content: `<div class="order-marker">${order}</div>`,
+      content: `
+        <div class="order-marker" onclick="alert('메모: ${memo}')">
+          ${order}
+        </div>
+      `,
       yAnchor: 1,
+      zIndex: 2,
     });
 
     overlay.setMap(map);
-
-    // 클릭 시 memo 표시
-    kakao.maps.event.addListener(overlay, "click", () => {
-      alert(`메모: ${memo}`);
-    });
-
     deliveryOverlays.push(overlay);
   });
 
-  drawRoute(path);
-
-  if (path.length > 0) map.setCenter(path[0]);
+  /* ---------- OSRM 경로 (배달 순서 기준) ---------- */
+  drawRoute(route.geometry);
 }
 
 /* ================= 경로 (화살표) ================= */
-function drawRoute(path) {
+function drawRoute(geometry) {
   if (routeLine) routeLine.setMap(null);
+
+  const path = geometry.map(([lat, lon]) => new kakao.maps.LatLng(lat, lon));
 
   routeLine = new kakao.maps.Polyline({
     path,
     strokeWeight: 5,
     strokeColor: "#007AFF",
-    strokeOpacity: 0.8,
+    strokeOpacity: 0.9,
     strokeStyle: "arrow",
+    zIndex: 3,
   });
 
   routeLine.setMap(map);
@@ -107,6 +119,7 @@ function startGpsTracking() {
         myLocationMarker = new kakao.maps.Marker({
           position: currentPos,
           map,
+          zIndex: 10, // 🔥 항상 최상단
           image: new kakao.maps.MarkerImage(
             "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png",
             new kakao.maps.Size(24, 35)
