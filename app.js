@@ -115,7 +115,7 @@ function showInfo(addr, memo, name, phoneNumber) {
     <h3>${addr || "-"}</h3>
     <p><b>성함</b><br/>${name || "-"}</p>
     <p><b>전화번호</b><br/>${phoneNumber || "-"}</p>
-    <p><b>정보</b><br/>${memo || "-"}</p>
+    <p><b>메모</b><br/>${memo || "-"}</p>
     <button onclick="document.getElementById('infoCard').remove()">닫기</button>
   `;
 
