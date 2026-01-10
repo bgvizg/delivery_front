@@ -58,24 +58,29 @@ async function loadRoute(area) {
   const deliveries = json.deliveries;
   const geometry = json.route.geometry;
 
-  deliveries.forEach(([order, addr, lat, lon, memo]) => {
-    const overlay = new kakao.maps.CustomOverlay({
-      position: new kakao.maps.LatLng(lat, lon),
-      content: `
+  deliveries.forEach(
+    ([order, addr, lat, lon, memo, name, phoneNumber, wantsDelivery]) => {
+      const safeAddr = (addr || "").replace(/'/g, "\\'");
+      const safeMemo = (memo || "").replace(/'/g, "\\'");
+      const safeName = (name || "").replace(/'/g, "\\'");
+      const safePhone = (phoneNumber || "").replace(/'/g, "\\'");
+
+      const overlay = new kakao.maps.CustomOverlay({
+        position: new kakao.maps.LatLng(lat, lon),
+        content: `
         <div class="order-marker"
-             onclick="showInfo('${addr.replace(/'/g, "\\'")}', '${(
-        memo || ""
-      ).replace(/'/g, "\\'")}')">
+             onclick="showInfo('${safeAddr}', '${safeMemo}', '${safeName}', '${safePhone}')">
           ${order}
         </div>
       `,
-      yAnchor: 1,
-      zIndex: 2,
-    });
+        yAnchor: 1,
+        zIndex: 2,
+      });
 
-    overlay.setMap(map);
-    deliveryOverlays.push(overlay);
-  });
+      overlay.setMap(map);
+      deliveryOverlays.push(overlay);
+    }
+  );
 
   drawOsrmRoute(geometry);
 }
@@ -99,7 +104,7 @@ function drawOsrmRoute(geometry) {
 }
 
 /* ================= 배달 정보 카드 ================= */
-function showInfo(addr, memo) {
+function showInfo(addr, memo, name, phoneNumber) {
   const old = document.getElementById("infoCard");
   if (old) old.remove();
 
@@ -107,8 +112,9 @@ function showInfo(addr, memo) {
   div.id = "infoCard";
   div.className = "info-card";
   div.innerHTML = `
-    <h3>배달 정보</h3>
-    <p><b>주소</b><br/>${addr}</p>
+    <h3>${addr || "-"}</h3>
+    <p><b>성함</b><br/>${name || "-"}</p>
+    <p><b>전화번호</b><br/>${phoneNumber || "-"}</p>
     <p><b>정보</b><br/>${memo || "-"}</p>
     <button onclick="document.getElementById('infoCard').remove()">닫기</button>
   `;
