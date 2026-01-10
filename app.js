@@ -12,7 +12,7 @@ function initMap() {
     level: 5,
   });
 
-  centerMapToMyLocation(); // 최초 1회 내 위치 중심
+  centerMapToMyLocation();
   loadAreas();
   startGpsTracking();
 }
@@ -43,9 +43,7 @@ async function loadAreas() {
     select.appendChild(opt);
   });
 
-  select.addEventListener("change", () => {
-    loadRoute(select.value);
-  });
+  select.onchange = () => loadRoute(select.value);
 
   if (areas.length > 0) loadRoute(areas[0]);
 }
@@ -60,16 +58,17 @@ async function loadRoute(area) {
   const deliveries = json.deliveries;
   const geometry = json.route.geometry;
 
-  /* ---------- 배달 숫자 마커 ---------- */
   deliveries.forEach(([order, addr, lat, lon, memo]) => {
     const overlay = new kakao.maps.CustomOverlay({
       position: new kakao.maps.LatLng(lat, lon),
       content: `
-      <div class="order-marker"
-           onclick="alert('주소: ${addr}\\n메모: ${memo}')">
-        ${order}
-      </div>
-    `,
+        <div class="order-marker"
+             onclick="showInfo('${addr.replace(/'/g, "\\'")}', '${(
+        memo || ""
+      ).replace(/'/g, "\\'")}')">
+          ${order}
+        </div>
+      `,
       yAnchor: 1,
       zIndex: 2,
     });
@@ -78,11 +77,10 @@ async function loadRoute(area) {
     deliveryOverlays.push(overlay);
   });
 
-  /* ---------- OSRM 도로 경로만 화살표 표시 ---------- */
   drawOsrmRoute(geometry);
 }
 
-/* ================= OSRM 경로 (화살표) ================= */
+/* ================= OSRM 경로 ================= */
 function drawOsrmRoute(geometry) {
   if (routeLine) routeLine.setMap(null);
 
@@ -100,12 +98,30 @@ function drawOsrmRoute(geometry) {
   routeLine.setMap(map);
 }
 
+/* ================= 배달 정보 카드 ================= */
+function showInfo(addr, memo) {
+  const old = document.getElementById("infoCard");
+  if (old) old.remove();
+
+  const div = document.createElement("div");
+  div.id = "infoCard";
+  div.className = "info-card";
+  div.innerHTML = `
+    <h3>배달 정보</h3>
+    <p><b>주소</b><br/>${addr}</p>
+    <p><b>정보</b><br/>${memo || "-"}</p>
+    <button onclick="document.getElementById('infoCard').remove()">닫기</button>
+  `;
+
+  document.body.appendChild(div);
+}
+
 /* ================= GPS 현재 위치 ================= */
 function startGpsTracking() {
   if (!navigator.geolocation) return;
 
-  setInterval(() => {
-    navigator.geolocation.getCurrentPosition((pos) => {
+  navigator.geolocation.watchPosition(
+    (pos) => {
       const currentPos = new kakao.maps.LatLng(
         pos.coords.latitude,
         pos.coords.longitude
@@ -114,18 +130,22 @@ function startGpsTracking() {
       if (!myLocationMarker) {
         myLocationMarker = new kakao.maps.Marker({
           position: currentPos,
-          map,
+          map: map,
           zIndex: 10,
-          image: new kakao.maps.MarkerImage(
-            "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png",
-            new kakao.maps.Size(24, 35)
-          ),
         });
       } else {
         myLocationMarker.setPosition(currentPos);
       }
-    });
-  }, 3000);
+    },
+    (err) => {
+      console.error("GPS 오류", err);
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 10000,
+    }
+  );
 }
 
 /* ================= 초기화 ================= */
