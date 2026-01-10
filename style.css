@@ -1,15 +1,15 @@
 body {
   margin: 0;
-  padding: 0;
+}
+
+#areaSelect {
+  position: absolute;
+  z-index: 10;
+  top: 10px;
+  left: 10px;
 }
 
 #map {
-  width: 100vw;
-  height: 95vh;
-}
-
-select {
   width: 100%;
-  height: 40px;
-  font-size: 16px;
+  height: 100vh;
 }

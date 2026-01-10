@@ -69,7 +69,7 @@ function initMap() {
   const container = document.getElementById("map");
 
   const options = {
-    center: new kakao.maps.LatLng(37.5665, 126.978), // 서울
+    center: new kakao.maps.LatLng(37.5665, 126.978),
     level: 5,
   };
 
@@ -78,4 +78,5 @@ function initMap() {
   loadAreas();
 }
 
-window.onload = initMap;
+/* ⭐ 핵심: SDK 로드 완료 후 실행 */
+kakao.maps.load(initMap);
