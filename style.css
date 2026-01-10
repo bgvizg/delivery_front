@@ -1,4 +1,30 @@
+body {
+  margin: 0;
+}
+
+#areaSelect {
+  position: absolute;
+  z-index: 1000;
+  top: 10px;
+  left: 10px;
+  font-size: 16px;
+}
+
 #map {
   width: 100%;
   height: 100vh;
+}
+
+/* 배달 순서 마커 */
+.order-marker {
+  background: #ff3b30;
+  color: #fff;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
 }

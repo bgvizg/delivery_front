@@ -1,17 +1,19 @@
 const API_BASE = "https://remains-counting-say-perception.trycloudflare.com";
 
 let map;
-let markers = [];
-let infoWindow = null;
+let deliveryOverlays = [];
+let routeLine = null;
+let myLocationMarker = null;
 
 /* ================= 지도 초기화 ================= */
 function initMap() {
   map = new kakao.maps.Map(document.getElementById("map"), {
     center: new kakao.maps.LatLng(37.5665, 126.978),
-    level: 6,
+    level: 5,
   });
 
   loadAreas();
+  startGpsTracking();
 }
 
 /* ================= 지역 목록 ================= */
@@ -33,57 +35,96 @@ async function loadAreas() {
     loadDeliveries(select.value);
   });
 
-  if (areas.length > 0) {
-    loadDeliveries(areas[0]);
-  }
+  if (areas.length > 0) loadDeliveries(areas[0]);
 }
 
-/* ================= 배달 핀 표시 ================= */
+/* ================= 배달 데이터 ================= */
 async function loadDeliveries(area) {
   const res = await fetch(
     `${API_BASE}/deliveries?area=${encodeURIComponent(area)}`
   );
   const json = await res.json();
 
-  clearMarkers();
+  clearDeliveries();
 
-  json.data.forEach((item) => {
-    // 구조: [rank, addr, lat, lon, memo]
-    const lat = item[2];
-    const lon = item[3];
-    const memo = item[4];
+  // 배달 순서 기준 정렬
+  const sorted = json.data.sort((a, b) => a[0] - b[0]);
 
-    const position = new kakao.maps.LatLng(lat, lon);
+  const path = [];
 
-    const marker = new kakao.maps.Marker({
-      map,
-      position,
+  sorted.forEach(([order, addr, lat, lon, memo]) => {
+    const pos = new kakao.maps.LatLng(lat, lon);
+    path.push(pos);
+
+    // 숫자 마커 (CustomOverlay)
+    const overlay = new kakao.maps.CustomOverlay({
+      position: pos,
+      content: `<div class="order-marker">${order}</div>`,
+      yAnchor: 1,
     });
 
-    kakao.maps.event.addListener(marker, "click", () => {
-      if (infoWindow) infoWindow.close();
+    overlay.setMap(map);
 
-      infoWindow = new kakao.maps.InfoWindow({
-        content: `<div style="padding:6px;font-size:13px;">${memo}</div>`,
-      });
-
-      infoWindow.open(map, marker);
+    // 클릭 시 memo 표시
+    kakao.maps.event.addListener(overlay, "click", () => {
+      alert(`메모: ${memo}`);
     });
 
-    markers.push(marker);
+    deliveryOverlays.push(overlay);
   });
 
-  // 첫 핀 기준으로 지도 이동
-  if (markers.length > 0) {
-    map.setCenter(markers[0].getPosition());
-  }
+  drawRoute(path);
+
+  if (path.length > 0) map.setCenter(path[0]);
 }
 
-/* ================= 마커 제거 ================= */
-function clearMarkers() {
-  markers.forEach((m) => m.setMap(null));
-  markers = [];
+/* ================= 경로 (화살표) ================= */
+function drawRoute(path) {
+  if (routeLine) routeLine.setMap(null);
+
+  routeLine = new kakao.maps.Polyline({
+    path,
+    strokeWeight: 5,
+    strokeColor: "#007AFF",
+    strokeOpacity: 0.8,
+    strokeStyle: "arrow",
+  });
+
+  routeLine.setMap(map);
 }
 
-/* ================= 시작 ================= */
+/* ================= GPS 현재 위치 ================= */
+function startGpsTracking() {
+  if (!navigator.geolocation) return;
+
+  setInterval(() => {
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      const currentPos = new kakao.maps.LatLng(lat, lon);
+
+      if (!myLocationMarker) {
+        myLocationMarker = new kakao.maps.Marker({
+          position: currentPos,
+          map,
+          image: new kakao.maps.MarkerImage(
+            "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png",
+            new kakao.maps.Size(24, 35)
+          ),
+        });
+      } else {
+        myLocationMarker.setPosition(currentPos);
+      }
+    });
+  }, 3000);
+}
+
+/* ================= 초기화 ================= */
+function clearDeliveries() {
+  deliveryOverlays.forEach((o) => o.setMap(null));
+  deliveryOverlays = [];
+
+  if (routeLine) routeLine.setMap(null);
+}
+
 window.onload = initMap;
