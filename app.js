@@ -8,7 +8,7 @@ let myLocationMarker = null;
 /* ================= 지도 초기화 ================= */
 function initMap() {
   map = new kakao.maps.Map(document.getElementById("map"), {
-    center: new kakao.maps.LatLng(37.5665, 126.978),
+    center: new kakao.maps.LatLng(38.060335, 128.166252),
     level: 5,
   });
 
@@ -65,7 +65,7 @@ async function loadRoute(area) {
     const overlay = new kakao.maps.CustomOverlay({
       position: new kakao.maps.LatLng(lat, lon),
       content: `
-        <div class="order-marker" onclick="alert('메모: ${memo}')">
+        <div class="order-marker" onclick="alert('주소: ${addr}\n메모: ${memo}')">
           ${order}
         </div>
       `,
