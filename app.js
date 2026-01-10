@@ -161,11 +161,16 @@ function startGpsTracking() {
 
 /* ================== 네비 ================== */
 function startKakaoNavi(lat, lon, name) {
-  const url = `kakaonavi://navigate?name=${encodeURIComponent(
-    name || "목적지"
-  )}&x=${lon}&y=${lat}&coord_type=wgs84`;
+  const encodedName = encodeURIComponent(name || "목적지");
 
-  window.location.href = url;
+  const url =
+    `kakaonavi://navigate` +
+    `?name=${encodedName}` +
+    `&x=${lon}` +
+    `&y=${lat}` +
+    `&coord_type=wgs84`;
+
+  location.href = url;
 }
 
 /* ================= 초기화 ================= */
