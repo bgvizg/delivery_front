@@ -1,4 +1,4 @@
-const API_BASE = "http://1.244.175.117";
+const API_BASE = "https://spy-heater-script-billion.trycloudflare.com";
 
 let map;
 let markers = [];
