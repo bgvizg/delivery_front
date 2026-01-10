@@ -164,9 +164,9 @@ function startGpsTracking() {
 /* ================== 네비 ================== */
 function startKakaoNavi(lat, lon, name) {
   Kakao.Navi.start({
-    name: name || "목적지",
-    x: lon, // 경도
-    y: lat, // 위도
+    name: "테스트 목적지",
+    x: 126.978,
+    y: 37.5665,
     coordType: "wgs84",
   });
 }
