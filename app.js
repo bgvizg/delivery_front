@@ -119,7 +119,7 @@ function showInfo(addr, memo, name, phoneNumber, lat, lon) {
 
     <button class="navi-btn"
       onclick="startKakaoNavi(${lat}, ${lon}, '${addr}')">
-      카카오 맵 경로 안내 (모바일 전용)
+      카카오맵으로 경로 안내 (모바일 전용)
     </button>
     <button onclick="document.getElementById('infoCard').remove()">닫기</button>
   `;
