@@ -69,7 +69,7 @@ async function loadRoute(area) {
         position: new kakao.maps.LatLng(lat, lon),
         content: `
         <div class="order-marker"
-             onclick="showInfo('${safeAddr}', '${safeMemo}', '${safeName}', '${safePhone}')">
+             onclick="showInfo('${safeAddr}', '${safeMemo}', '${safeName}', '${safePhone}', ${lat}, ${lon})">
           ${order}
         </div>
       `,
@@ -104,7 +104,7 @@ function drawOsrmRoute(geometry) {
 }
 
 /* ================= 배달 정보 카드 ================= */
-function showInfo(addr, memo, name, phoneNumber) {
+function showInfo(addr, memo, name, phoneNumber, lat, lon) {
   const old = document.getElementById("infoCard");
   if (old) old.remove();
 
@@ -116,6 +116,11 @@ function showInfo(addr, memo, name, phoneNumber) {
     <p><b>성함</b><br/>${name || "-"}</p>
     <p><b>전화번호</b><br/>${phoneNumber || "-"}</p>
     <p><b>메모</b><br/>${memo || "-"}</p>
+
+    <button class="navi-btn"
+      onclick="startKakaoNavi(${lat}, ${lon}, '${addr}')">
+      카카오내비로 경로 안내
+    </button>
     <button onclick="document.getElementById('infoCard').remove()">닫기</button>
   `;
 
@@ -152,6 +157,15 @@ function startGpsTracking() {
       timeout: 10000,
     }
   );
+}
+
+/* ================== 네비 ================== */
+function startKakaoNavi(lat, lon, name) {
+  const url = `kakaonavi://navigate?name=${encodeURIComponent(
+    name || "목적지"
+  )}&x=${lon}&y=${lat}&coord_type=wgs84`;
+
+  window.location.href = url;
 }
 
 /* ================= 초기화 ================= */
