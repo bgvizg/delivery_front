@@ -4,16 +4,15 @@ let map;
 let deliveryOverlays = [];
 let routeLine = null;
 let myLocationMarker = null;
-let isMapCentered = false;
 
 /* ================= 지도 초기화 ================= */
 function initMap() {
   map = new kakao.maps.Map(document.getElementById("map"), {
-    center: new kakao.maps.LatLng(37.5665, 126.978), // 임시
+    center: new kakao.maps.LatLng(37.5665, 126.978),
     level: 5,
   });
 
-  centerMapToMyLocation(); // 🔥 최초 1회만 중심 이동
+  centerMapToMyLocation(); // 최초 1회 내 위치 중심
   loadAreas();
   startGpsTracking();
 }
@@ -23,12 +22,9 @@ function centerMapToMyLocation() {
   if (!navigator.geolocation) return;
 
   navigator.geolocation.getCurrentPosition((pos) => {
-    const lat = pos.coords.latitude;
-    const lon = pos.coords.longitude;
-    const myPos = new kakao.maps.LatLng(lat, lon);
-
-    map.setCenter(myPos);
-    isMapCentered = true;
+    map.setCenter(
+      new kakao.maps.LatLng(pos.coords.latitude, pos.coords.longitude)
+    );
   });
 }
 
@@ -62,14 +58,12 @@ async function loadRoute(area) {
   clearDeliveries();
 
   const deliveries = json.deliveries;
-  const route = json.route;
+  const geometry = json.route.geometry;
 
   /* ---------- 배달 숫자 마커 ---------- */
   deliveries.forEach(([order, addr, lat, lon, memo]) => {
-    const pos = new kakao.maps.LatLng(lat, lon);
-
     const overlay = new kakao.maps.CustomOverlay({
-      position: pos,
+      position: new kakao.maps.LatLng(lat, lon),
       content: `
         <div class="order-marker" onclick="alert('메모: ${memo}')">
           ${order}
@@ -83,12 +77,12 @@ async function loadRoute(area) {
     deliveryOverlays.push(overlay);
   });
 
-  /* ---------- OSRM 경로 (배달 순서 기준) ---------- */
-  drawRoute(route.geometry);
+  /* ---------- OSRM 도로 경로만 화살표 표시 ---------- */
+  drawOsrmRoute(geometry);
 }
 
-/* ================= 경로 (화살표) ================= */
-function drawRoute(geometry) {
+/* ================= OSRM 경로 (화살표) ================= */
+function drawOsrmRoute(geometry) {
   if (routeLine) routeLine.setMap(null);
 
   const path = geometry.map(([lat, lon]) => new kakao.maps.LatLng(lat, lon));
@@ -98,7 +92,7 @@ function drawRoute(geometry) {
     strokeWeight: 5,
     strokeColor: "#007AFF",
     strokeOpacity: 0.9,
-    strokeStyle: "arrow",
+    strokeStyle: "arrow", // 🔥 가는 길 방향
     zIndex: 3,
   });
 
@@ -111,9 +105,10 @@ function startGpsTracking() {
 
   setInterval(() => {
     navigator.geolocation.getCurrentPosition((pos) => {
-      const lat = pos.coords.latitude;
-      const lon = pos.coords.longitude;
-      const currentPos = new kakao.maps.LatLng(lat, lon);
+      const currentPos = new kakao.maps.LatLng(
+        pos.coords.latitude,
+        pos.coords.longitude
+      );
 
       if (!myLocationMarker) {
         myLocationMarker = new kakao.maps.Marker({
