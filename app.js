@@ -1,4 +1,4 @@
-const API_BASE = "https://remains-counting-say-perception.trycloudflare.com";
+const API_BASE = "https://alexandria-village-plug-lan.trycloudflare.com";
 
 let map;
 let deliveryOverlays = [];
