@@ -1,4 +1,4 @@
-const API_BASE = "https://alexandria-village-plug-lan.trycloudflare.com";
+const API_BASE = "https://beauty-continental-chassis-vat.trycloudflare.com";
 
 let map;
 let deliveryOverlays = [];
