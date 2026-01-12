@@ -58,24 +58,26 @@ async function loadRoute(area) {
   const deliveries = json.deliveries;
   const geometry = json.route.geometry;
 
- deliveries.forEach(
+  deliveries.forEach(
   ([order, addr, lat, lon, memo, name, phoneNumber, wantsDelivery]) => {
     const safeAddr = (addr || "").replace(/'/g, "\\'");
     const safeMemo = (memo || "").replace(/'/g, "\\'");
     const safeName = (name || "").replace(/'/g, "\\'");
     const safePhone = (phoneNumber || "").replace(/'/g, "\\'");
 
-    // ✅ 우선순위 기반 마커 클래스 결정
     let markerClass;
 
-    if (!wantsDelivery) {
-      // 1️⃣ 부재 → 무조건 회색
+    if (order === 0) {
+      // 🔵 최우선
+      markerClass = "order-marker-start";
+    } else if (!wantsDelivery) {
+      // ⚪ 부재
       markerClass = "order-marker-nondelivery";
     } else if (memo && memo.trim().length > 0) {
-      // 2️⃣ 배송 + memo 존재 → 노란색
+      // 🟡 메모 있음
       markerClass = "order-marker-memo";
     } else {
-      // 3️⃣ 나머지 → 빨간색
+      // 🔴 일반 배송
       markerClass = "order-marker-delivery";
     }
 
@@ -88,13 +90,13 @@ async function loadRoute(area) {
         </div>
       `,
       yAnchor: 1,
-      zIndex: 2,
+      zIndex: 3,
     });
 
     overlay.setMap(map);
     deliveryOverlays.push(overlay);
-    }
-  );
+  }
+);
 
   drawOsrmRoute(geometry);
 }
