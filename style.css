@@ -26,7 +26,7 @@ body {
   height: 100vh;
 }
 
-/* 배달 순서 마커 */
+/* 배송 정상 (빨간색) */
 .order-marker-delivery {
   background: #ff3b30;
   color: #fff;
@@ -40,10 +40,24 @@ body {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
-/* 부재 순서 마커 */
+/* 부재 */
 .order-marker-nondelivery {
-  background: #9CA3AF;
+  background: #9ca3af;
   color: #fff;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  line-height: 34px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* memo 있음 (노란색) */
+.order-marker-memo {
+  background: #facc15; /* Tailwind yellow-400 */
+  color: #000;
   border-radius: 50%;
   width: 34px;
   height: 34px;
