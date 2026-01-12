@@ -71,7 +71,7 @@ body {
 /* 🟡 메모 있음 */
 .order-marker-memo {
   background: #facc15;
-  color: #000;
+  color: #fff;
   border-radius: 50%;
   width: 34px;
   height: 34px;
