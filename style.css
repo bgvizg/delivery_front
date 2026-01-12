@@ -70,8 +70,8 @@ body {
 
 /* 🟡 메모 있음 */
 .order-marker-memo {
-  background: #059669;
-  color: #fff;
+  background: #facc15;
+  color: #000;
   border-radius: 50%;
   width: 34px;
   height: 34px;
