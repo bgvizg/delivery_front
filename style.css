@@ -27,8 +27,22 @@ body {
 }
 
 /* 배달 순서 마커 */
-.order-marker {
+.order-marker-delivery {
   background: #ff3b30;
+  color: #fff;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  line-height: 34px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* 부재 순서 마커 */
+.order-marker-nondelivery {
+  background: #9CA3AF;
   color: #fff;
   border-radius: 50%;
   width: 34px;

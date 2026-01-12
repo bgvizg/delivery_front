@@ -65,14 +65,19 @@ async function loadRoute(area) {
       const safeName = (name || "").replace(/'/g, "\\'");
       const safePhone = (phoneNumber || "").replace(/'/g, "\\'");
 
+      // ✅ wantsDelivery에 따른 클래스 분기
+      const markerClass = wantsDelivery
+        ? "order-marker-delivery"
+        : "order-marker-nondelivery";
+
       const overlay = new kakao.maps.CustomOverlay({
         position: new kakao.maps.LatLng(lat, lon),
         content: `
-        <div class="order-marker"
-             onclick="showInfo('${safeAddr}', '${safeMemo}', '${safeName}', '${safePhone}', ${lat}, ${lon})">
-          ${order}
-        </div>
-      `,
+          <div class="${markerClass}"
+              onclick="showInfo('${safeAddr}', '${safeMemo}', '${safeName}', '${safePhone}', ${lat}, ${lon})">
+            ${order}
+          </div>
+        `,
         yAnchor: 1,
         zIndex: 2,
       });
